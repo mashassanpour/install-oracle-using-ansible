@@ -1,0 +1,27 @@
+---
+- name: Test Amendment of a text
+  hosts: ansdns01.masoudhhp.com
+  gather_facts: false
+  tasks:
+    - name: Remove Heading
+      ansible.builtin.replace:
+        path: test.txt
+        regexp: '(?:[\s\S]*)(^STARTUP.*$)'
+        replace: '\1'
+
+    - name: Remove Tailing
+      ansible.builtin.replace:
+        path: test.txt
+        regexp: '(^;$)(?:[\s\S]*)'
+        replace: '\1'
+
+    - name: Remove unwanted lines
+      ansible.builtin.replace:
+        path: test.txt
+        regexp: '{{ item.0 }}{{ item.1 }}'
+        replace: '\1'
+      with_together:
+        - ['(?:[\s\S]*)', '(^;$)']
+        - ['(^STARTUP.*$)', '(?:[\s\S]*)']
+      tags: replace_with_looping
+...

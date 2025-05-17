@@ -1,0 +1,89 @@
+---
+- name: Install Oracle DB software only
+  hosts: shiraz.masoudhhp.com
+  vars_files:
+    - vars/vars.yaml
+  become: true
+
+  tasks:
+    - name: Update /etc/hosts
+      ansible.builtin.template:
+        src: templates/hosts.j2
+        dest: /etc/hosts
+        mode: '0644'
+      tags: update_hosts
+
+    - name: Update network interface
+      community.general.nmcli:
+        conn_name: enp0s3
+        type: ethernet
+        state: present
+        ip4: 192.168.0.77/24
+        gw4: 192.168.0.1
+        dns4: 192.168.0.84
+        method4: manual
+        method6: disabled
+        dns4_ignore_auto: true
+      tags: update_network_interface
+
+    - name: Set SELinux to permissive in /etc/selinux/config
+      ansible.builtin.replace:
+        path: /etc/selinux/config
+        regexp: '^SELINUX=.*'
+        replace: 'SELINUX=permissive'
+      tags: selinux
+
+    - name: Stop firewalld
+      ansible.builtin.service:
+        name: firewalld
+        state: stopped
+        enabled: false
+      tags: firewalld
+
+    - name: Install oracle-database-preinstall-19c package
+      ansible.builtin.dnf:
+        name: oracle-database-preinstall-19c
+        state: present
+
+    - name: Add the groups required by database
+      ansible.builtin.group:
+        name: "{{ item }}"
+        state: present
+      with_items: [oinstall, dba, oper, backupdba, dgdba, kmdba, racdba, asmadmin, asmdba, asmoper]
+      tags: adding_groups
+
+    - name: Add the users required by database
+      ansible.builtin.user:
+        name: "{{ item.user }}"
+        group: "{{ item.groups[0] }}"
+        groups: "{{ item.groups }}"
+        state: present
+      with_items:
+        - user: oracle
+          groups: [oinstall, dba, oper, backupdba, dgdba, kmdba, racdba, asmdba]
+        - user: grid
+          groups: [oinstall, dba, racdba, asmadmin, asmdba, asmoper]
+      tags: adding_groups
+
+    - name: Crating directories required by database
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode | default('0775') }}"
+      loop:
+        - { path: "/u01/app/19.0.0/grid", owner: "grid", group: "oinstall" }
+        - { path: "/u01/app/grid", owner: "grid", group: "oinstall" }
+        - { path: "/u01/app/oracle", owner: "oracle", group: "oinstall" }
+      tags: create_directories
+
+    - name: Update .bash_profile for grid user
+      ansible.builtin.template:
+        src: templates/gi_bash_profile.j2
+        dest: /home/grid/.bash_profile
+        owner: grid
+        group: oinstall
+        mode: '0644'
+      tags: update_bash_profile
+...

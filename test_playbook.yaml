@@ -1,0 +1,17 @@
+---
+- name: Updating all packages and creating a file
+  hosts: dbservers
+
+  tasks:
+   - name: Creating a test file
+     ansible.builtin.file:
+      path: ~/test.txt
+      state: touch
+      mode: "600"
+
+   - name: Writing to ~/test.txt
+     ansible.builtin.copy:
+      dest: ~/test.txt
+      content: "the server rebooted and ansible continued the job! fab!\n"
+      mode: "0600"
+...

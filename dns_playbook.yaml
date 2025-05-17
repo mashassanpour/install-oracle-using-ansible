@@ -1,0 +1,18 @@
+---
+- name: Deploy DNS server to control hosts
+  hosts: abadan.masoudhhp.com
+
+  tasks:
+    - name: Test db_status local module
+      db_status:
+        mode: sysdba
+      register: db_status
+      become: true
+      become_user: oracle
+
+    - name: Check database status
+      ansible.builtin.debug:
+        msg: the database is in nomount state!
+      when: db_status.status == 'STARTED'
+
+...

@@ -1,0 +1,48 @@
+---
+- name: Test Oracle connection
+  hosts: abadan.masoudhhp.com
+
+  tasks:
+    - name: Gathering the facts from the installed packages
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Check if pip has been installed
+      ansible.builtin.debug:
+        msg: "{{ ansible_facts.packages['python3-pip'] }}"
+      when: "'python3-pip' in ansible_facts.packages"
+
+    - name: Install pip if hasn't been installed already
+      ansible.builtin.package:
+        name: python3-pip
+        state: present
+      when: "'python3-pip' not in ansible_facts.packages"
+
+    - name: Install cx_Oracle
+      ansible.builtin.pip:
+        name: cx_Oracle
+        state: present
+      tags: ucx_Oracle
+
+    - name: Connect to grid infrastructure
+      ibre5041.ansible_oracle_modules.oracle_sql:
+        mode: sysdba
+        sql: "select version_full from v$instance"
+      register: query_result
+      environment:
+        ORACLE_HOME: /u01/app/19.0.0/grid
+        ORACLE_SID: +ASM
+      become: true
+      become_user: grid
+      tags: grid_connection
+
+    - name: Query result
+      ansible.builtin.debug:
+        msg: "{{ query_result.data[0].version_full }}"
+      tags: grid_connection
+
+    - name: Query result2
+      ansible.builtin.debug:
+        msg: "{{ query_result }}"
+      tags: grid_connection
+...

@@ -1,0 +1,23 @@
+---
+- name: Masoud test
+  hosts: control
+
+  tasks:
+    - name: Print costum_test from hostvars
+      ansible.builtin.template:
+        src: templates/dump
+        dest: magic
+        mode: '0644'
+
+    - name: Print ansible_host for each dbserver
+      ansible.builtin.debug:
+        msg: >
+          {% for host in groups['dbservers'] %}
+            {{ host }}: {{ hostvars[host]['ansible_host'] }}
+          {% endfor %}
+
+    - name: Print ansible_host for each host
+      ansible.builtin.debug:
+        msg: >
+          {{ inventory_hostname }}: {{ hostvars[inventory_hostname].get('ansible_host', 'localhost') }}
+...

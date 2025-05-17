@@ -1,0 +1,22 @@
+---
+control:
+  hosts:
+    ansdns01.masoudhhp.com:
+      ansible_connection: local
+      ansible_host: 192.168.0.84
+
+dbservers:
+  hosts:
+    abadan.masoudhhp.com:
+      ansible_host: 192.168.0.62
+      custom_hostname: abadan
+    shiraz.masoudhhp.com:
+      ansible_host: 192.168.0.77
+      custom_hostname: shiraz
+
+all:
+  vars:
+    ansible_become: true
+    ansible_python_interpreter: /usr/bin/python3.9
+
+...

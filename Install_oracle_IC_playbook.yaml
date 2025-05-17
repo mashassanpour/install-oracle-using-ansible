@@ -1,0 +1,28 @@
+---
+- name: Installing Oracle Instant Client on the Control
+  hosts: control
+
+  tasks:
+    - name: Add groups
+      ansible.builtin.group:
+        name: "{{ item }}"
+      loop:
+        - oinstall
+        - dba
+
+    - name: Creating Oracle User
+      ansible.builtin.user:
+        name: oracle
+        generate_ssh_key: true
+        ssh_key_file: .ssh/id_rsa
+        group: oinstall
+        groups: dba
+
+    - name: Install Oracle instantclient
+      ansible.builtin.dnf:
+        name:
+          - /root/oracle-instantclient-basic-21.16.0.0.0-1.el8.x86_64.rpm
+          - /root/oracle-instantclient-sqlplus-21.16.0.0.0-1.el8.x86_64.rpm
+        state: present
+        disable_gpg_check: true
+...
