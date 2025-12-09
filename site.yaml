@@ -17,6 +17,5 @@ dbservers:
 all:
   vars:
     ansible_become: true
-    ansible_python_interpreter: /usr/bin/python3.9
-
+    ansible_python_interpreter: /usr/bin/python3.12
 ...
