@@ -14,6 +14,6 @@
       register: db_status_result
 
     - name: Display database status
-      debug:
+      ansible.builtin.debug:
         var: db_status_result
 ...
