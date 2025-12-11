@@ -1,1 +1,0 @@
-/home/ansible/.ansible/plugins/modules/db_status.py
