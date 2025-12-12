@@ -4,13 +4,13 @@
 
   tasks:
     - name: Check status of Oracle database
-      db_status:
+      db_status_old:
         state: check
       become: true
       become_user: oracle
       environment:
         ORACLE_HOME: /u01/app/oracle/product/19.27.0/dbhome_1
-        ORACLE_SID: cdb1
+        ORACLE_SID: cdb11
       register: db_status_result
 
     - name: Display database status
